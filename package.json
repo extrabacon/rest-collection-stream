@@ -1,0 +1,31 @@
+{
+  "name": "rest-collection-stream",
+  "version": "0.0.1",
+  "author": {
+    "name": "Nicolas Mercier"
+  },
+  "description": "REST client for streaming an entire collection of resources",
+  "keywords": [
+    "rest",
+    "json",
+    "stream",
+    "paging"
+  ],
+  "scripts": {
+    "test": "mocha test/**/test-*.js -R spec"
+  },
+  "dependencies": {
+    "request": "^2.34.0",
+    "event-stream": "^3.1.4"
+  },
+  "devDependencies": {
+    "mocha": "^1.18.2",
+    "should": "^3.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/extrabacon/rest-collection-stream"
+  },
+  "homepage": "http://github.com/extrabacon/rest-collection-stream",
+  "bugs": "http://github.com/extrabacon/rest-collection-stream/issues"
+}
