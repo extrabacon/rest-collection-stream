@@ -1,8 +1,8 @@
 # rest-collection-stream
 
-A simple HTTP client for streaming JSON content from REST collections. Includes extensive pagination support for continuous streaming across multiple HTTP requests.
+A simple HTTP client for streaming JSON content from REST lists and collections. Includes extensive pagination support for continuous streaming across multiple HTTP requests.
 
-Use this module to pull an entire collection of JSON documents from your favorite API into a Node.js stream! It will parse a response as JSON, extract content as objects, push it down the stream, and continue doing so if the collection supports paging.
+Use this module to pull an entire collection of JSON documents from your favorite API into a Node.js stream! It will parse a response as JSON, extract content as objects, push it down the stream, and continue doing so as long as there is more data.
 
 ```js
 var restCollection = require('rest-collection-stream');

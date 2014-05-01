@@ -4,7 +4,7 @@
   "author": {
     "name": "Nicolas Mercier"
   },
-  "description": "REST client for streaming an entire collection of resources",
+  "description": "A REST client for streaming collections and lists",
   "keywords": [
     "rest",
     "json",
