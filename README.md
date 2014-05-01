@@ -2,7 +2,7 @@
 
 A simple HTTP client for streaming JSON content from REST lists and collections. Includes extensive pagination support for continuous streaming across multiple HTTP requests.
 
-Use this module to pull an entire collection of JSON documents from your favorite API into a Node.js stream! It will parse a response as JSON, extract content as objects, push it down the stream, and continue doing so as long as there is more data.
+Use this module to pull an entire collection of JSON documents from your favorite API into a Node.js stream! It will parse the response as JSON, extract content as objects, push it down the stream, and continue doing so as long as there is more data.
 
 ```js
 var restCollection = require('rest-collection-stream');
@@ -28,7 +28,8 @@ var restCollection = require('rest-collection-stream');
 var fs = require('fs');
 var es = require('event-stream');
 
-restCollection('https://somecloudapp.io/api/v1/resource')
+// export all customers into a backup file
+restCollection('https://somecloudapp.io/api/v1/customers')
   .pipe(es.map(/* my mapping function */))
   .pipe(es.stringify())
   .pipe(fs.createWriteStream(backupFile));
@@ -46,7 +47,7 @@ In addition to request options, you may also set:
 
 The following options are also enforced:
 - `json` - always **true**, only JSON APIs are supported at the moment and the response body is always parsed as such
-- `headers` - HTTP compression is enabled by default via `Accept-Encoding` - a nicety if you are pulling thousands of documents from your host
+- `headers` - HTTP compression is enabled by default via `Accept-Encoding` - a nicety if you are pulling thousands of documents from the API servers
 
 ### Streaming objects from the response
 
@@ -82,7 +83,7 @@ restCollection(url, {
 
 ### Pagination
 
-Another request for the next page data is automatically sent if there is more data available. The module implements common pagination support from popular APIs, but you can also supply your own.
+Another request for the next page of data is automatically sent if there is more data available. The module implements common pagination support from popular APIs, but you can also supply your own.
 
 #### Built-in pagination support
 
@@ -139,6 +140,7 @@ restCollection(url, {
 ## Dependencies
 
 + [request](https://github.com/mikeal/request)
++ [event-stream](https://github.com/dominictarr/event-stream)
 
 ## License
 
