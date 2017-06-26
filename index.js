@@ -146,14 +146,26 @@ function requestWithEncoding(options, callback) {
       var encoding = res.headers['content-encoding'];
       if (encoding === 'gzip') {
         zlib.gunzip(buffer, function (err, decoded) {
-          callback(err, res, decoded && JSON.parse(decoded.toString()));
+          if (err) return callback(err, res);
+          parse(decoded);
         });
       } else if (encoding === 'deflate') {
         zlib.inflate(buffer, function (err, decoded) {
-          callback(err, res, decoded && JSON.parse(decoded.toString()));
+          if (err) return callback(err, res);
+          parse(decoded);
         });
       } else {
-        callback(null, res, JSON.parse(buffer.toString()));
+        parse(buffer);
+      }
+
+      function parse (decoded) {
+        if (!decoded) return;
+        try {
+          var parsed = JSON.parse(decoded.toString());
+          callback(null, res, parsed);
+        } catch (e) {
+          callback(e, res);
+        }
       }
     });
   });

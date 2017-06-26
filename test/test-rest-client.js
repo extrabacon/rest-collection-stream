@@ -57,6 +57,26 @@ describe('restCollection API', function () {
       }))
       .on('end', done);
   });
+  it('should emit stream error on request error', function (done) {
+    restCollection.request = function (options, callback) {
+      callback(new Error("something went wrong"), {});
+    };
+    restCollection('http://host/someapi')
+      .on('error', function (err) {
+        err.should.be.an.instanceOf(Error);
+        done();
+      })
+  });
+  it('should emit stream error when JSON is not returned', function (done) {
+    restCollection.request = function (options, callback) {
+      callback(null, {}, "<html></html>");
+    };
+    restCollection('http://host/someapi')
+      .on('error', function (err) {
+        err.should.be.an.instanceOf(Error);
+        done();
+      })
+  });
   it('should parse data with a custom function', function (done) {
     restCollection.request = function (options, callback) {
       callback(null, {}, {
