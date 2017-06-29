@@ -149,6 +149,29 @@ describe('restCollection API', function () {
       }))
       .on('end', done);
   });
+  it('should paginate JSON API Paging spec', function (done) {
+    restCollection.request = function (options, callback) {
+      if (options.uri.path === '/someapi/page1') {
+        callback(null, {}, {
+          data: [1, 2, 3],
+          links: { next: '/someapi/page2' }
+        });
+      } else if (options.uri.path === '/someapi/page2') {
+        callback(null, {}, {
+          data: [4, 5, 6],
+          links: {next: 'http://host/someapi/page3'}
+        });
+      } else {
+        callback(null, {}, { data: [7, 8] });
+      }
+    };
+    restCollection('http://host/someapi/page1')
+      .pipe(es.join(','))
+      .pipe(es.wait(function (err, text) {
+        text.should.be.exactly('1,2,3,4,5,6,7,8');
+      }))
+      .on('end', done);
+  });
   it('should paginate with the query string', function (done) {
     var data = [1, 2, 3, 4, 5, 6, 7, 8];
     restCollection.request = function (options, callback) {

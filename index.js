@@ -33,6 +33,8 @@ var defaults = {
     }
     // look for commonly used properties
     if (body.paging && body.paging.next) return body.paging.next;
+    // http://jsonapi.org/format/#fetching-pagination
+    if (body.links && body.links.next) return body.links.next;
     if (body.meta && body.meta.next) return body.meta.next;
     //   Google APIs
     if (typeof body.nextLink === 'string') return body.nextLink;
