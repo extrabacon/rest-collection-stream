@@ -4,6 +4,9 @@
   "author": {
     "name": "Nicolas Mercier"
   },
+  "bin": {
+    "rest-collection-stream": "cli.js"
+  },
   "description": "A REST client for streaming collections and lists",
   "keywords": [
     "rest",
@@ -15,8 +18,10 @@
     "test": "mocha test/**/test-*.js -R spec"
   },
   "dependencies": {
-    "request": "^2.34.0",
-    "event-stream": "^3.1.4"
+    "debug": "^2.6.8",
+    "event-stream": "^3.1.4",
+    "ndjson": "^1.4.3",
+    "request": "^2.34.0"
   },
   "devDependencies": {
     "mocha": "^1.18.2",
