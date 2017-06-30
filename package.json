@@ -18,9 +18,10 @@
     "test": "mocha test/**/test-*.js -R spec"
   },
   "dependencies": {
-    "request": "^2.34.0",
+    "debug": "^2.6.8",
     "event-stream": "^3.1.4",
-    "ndjson": "^1.4.3"
+    "ndjson": "^1.4.3",
+    "request": "^2.34.0"
   },
   "devDependencies": {
     "mocha": "^1.18.2",

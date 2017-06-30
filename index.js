@@ -1,8 +1,10 @@
+var Url = require('url');
 var request = require('request');
 var zlib = require('zlib');
 var parseUrl = require('url').parse;
 var resolveUrl = require('url').resolve;
 var es = require('event-stream');
+var debug = require('debug')('rest-collection-stream');
 
 var isUrl = RegExp.prototype.test.bind(/^http(s)?:/);
 var parseLink = RegExp.prototype.exec.bind(/<(.+?)>;\s*rel=['"]?next['"]?/);
@@ -92,46 +94,63 @@ var restCollection = function (url, o) {
     var stream = this;
     options.pageIndex = count;
     stream.req = options;
+    var reqCount = 0;
+    var retries = options.retries || 0;
+    var delay = options.retryDelay || 5000;
+    var fullUrl = Url.format(options.uri);
+    debug('requesting', fullUrl);
+    makeRequest();
+    
+    function makeRequest () {
+      req(options, function (err, res, body) {
+        if (err || res.statusCode > 299) {
+          if (++reqCount < retries) {
+            debug('request error, retrying', fullUrl, res.statusCode);
+            setTimeout(makeRequest, delay);
+            return;
+          } else {
+            return stream.emit('error', body);
+          }
+        }
+        if (err) return stream.emit('error', err);
+        if (res.statusCode > 299) return stream.emit('error', body);
+        stream.emit('page', options, res, body);
 
-    req(options, function (err, res, body) {
-      if (err) return stream.emit('error', err);
-      if (res.statusCode > 299) return stream.emit('error', body);
-      stream.emit('page', options, res, body);
+        var data = options.data.call(stream, res, body);
+        if (data) {
+          if (Array.isArray(data)) {
+            // data is an array: emit all elements individually
+            data.forEach(function (obj) {
+              stream.emit('data', obj);
+            });
+          } else {
+            // data is something else: emit as-is
+            stream.emit('data', data);
+          }
+        }
 
-      var data = options.data.call(stream, res, body);
-      if (data) {
-        if (Array.isArray(data)) {
-          // data is an array: emit all elements individually
-          data.forEach(function (obj) {
-            stream.emit('data', obj);
+        var nextPage = options.next.call(stream, res, body);
+        if (isObject(nextPage)) {
+          // nextPage is an object: use as querystring parameters
+          Object.keys(nextPage).forEach(function (key) {
+            options.qs[key] = nextPage[key];
           });
+        } else if (typeof nextPage === 'string') {
+          if (isUrl(nextPage)) {
+            // a full URL (starting with http:)
+            options.uri = parseUrl(nextPage);
+          } else {
+            // resolve the URL
+            options.uri = parseUrl(resolveUrl(options.uri.href, nextPage));
+          }
         } else {
-          // data is something else: emit as-is
-          stream.emit('data', data);
+          // no nextPage, next iteration will end the stream
+          options.uri = null;
         }
-      }
 
-      var nextPage = options.next.call(stream, res, body);
-      if (isObject(nextPage)) {
-        // nextPage is an object: use as querystring parameters
-        Object.keys(nextPage).forEach(function (key) {
-          options.qs[key] = nextPage[key];
-        });
-      } else if (typeof nextPage === 'string') {
-        if (isUrl(nextPage)) {
-          // a full URL (starting with http:)
-          options.uri = parseUrl(nextPage);
-        } else {
-          // resolve the URL
-          options.uri = parseUrl(resolveUrl(options.uri.href, nextPage));
-        }
-      } else {
-        // no nextPage, next iteration will end the stream
-        options.uri = null;
-      }
-
-      callback();
-    });
+        callback();
+      });
+    }
   });
 
 };
@@ -167,7 +186,7 @@ function requestWithEncoding(options, callback) {
           var parsed = JSON.parse(decoded.toString());
           callback(null, res, parsed);
         } catch (e) {
-          callback(e, res);
+          callback('Could not parse: ' + decoded.toString(), res);
         }
       }
     });
