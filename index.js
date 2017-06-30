@@ -74,15 +74,15 @@ var restCollection = function (url, o) {
     data: defaults.data,
     next: defaults.next
   };
-
-  o && Object.keys(o).forEach(function (key) {
-    options[key] = o[key];
-  });
-
+  
   // setup headers - only JSON is supported
   options.headers = options.headers || {};
   options.headers.Accept = 'application/json';
   options.headers['Accept-Encoding'] = 'gzip, deflate';
+
+  o && Object.keys(o).forEach(function (key) {
+    options[key] = o[key];
+  });
 
   return es.readable(function (count, callback) {
     // nowhere to go next, end the stream
@@ -95,6 +95,7 @@ var restCollection = function (url, o) {
 
     req(options, function (err, res, body) {
       if (err) return stream.emit('error', err);
+      if (res.statusCode > 299) return stream.emit('error', body);
       stream.emit('page', options, res, body);
 
       var data = options.data.call(stream, res, body);

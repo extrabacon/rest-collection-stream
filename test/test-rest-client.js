@@ -18,8 +18,6 @@ describe('restCollection API', function () {
       options.uri.href.should.eql('http://host/someapi');
       options.qs.should.eql({ $top: 100 });
       options.headers.should.containEql({
-        'Accept': 'application/json',
-        'Accept-Encoding': 'gzip, deflate',
         'X-Header': 'value'
       });
       options.should.containEql({ someOption: true });
@@ -56,6 +54,18 @@ describe('restCollection API', function () {
         text.should.be.exactly('1,2,3,4,5');
       }))
       .on('end', done);
+  });
+  it('should overwrite defaults with options', function (done) {
+    restCollection.request = function (options, callback) {
+      options.headers.accept.should.be.equal.to('pizza');
+      options.headers.json.should.be.equal.to(false);
+      callback(new Error("something went wrong"), {});
+    };
+    restCollection('http://host/someapi', {json: false, headers: {accept: 'pizza'}})
+      .on('error', function (err) {
+        err.should.be.an.instanceOf(Error);
+        done();
+      })
   });
   it('should emit stream error on request error', function (done) {
     restCollection.request = function (options, callback) {
